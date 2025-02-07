@@ -1,7 +1,9 @@
 [build]
-  command = "npm run build"
-  publish = "build"
-  functions = "netlify/functions"
+  command = ""  # No build step since you only have HTML and JS
+  publish = "." # Serve files from the root directory
+
+[functions]
+  directory = "netlify/functions"
 
 [[redirects]]
   from = "/api/*"
