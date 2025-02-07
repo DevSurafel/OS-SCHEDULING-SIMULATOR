@@ -1,0 +1,18 @@
+{
+  "name": "netlify-telegram-bot",
+  "version": "1.0.0",
+  "description": "A Telegram bot deployed on Netlify Functions",
+  "main": "index.js",
+  "scripts": {
+    "build": "echo 'No build step needed'",
+    "start": "node netlify/functions/bot.js"
+  },
+  "dependencies": {
+    "telegraf": "^4.12.2"
+  },
+  "devDependencies": {},
+  "engines": {
+    "node": ">=14"
+  },
+  "license": "MIT"
+}
