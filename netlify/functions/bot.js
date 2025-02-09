@@ -7,7 +7,7 @@ const community_link = "https://t.me/+p9ThUnIaaV0wYzZk";
 
 const welcomeMessage = (user) => {
   const userName = user.username ? `@${user.username}` : user.first_name;
-  return `Hey ${userName}, Welcome!\n\n` +
+  return `Hey ${userName}, Welcome!\n\n`
     "Secure, fast, and private VPN at your fingertips! Connect instantly and browse the internet with freedom. No logs, no limits—just pure privacy. Tap to connect!\n\n" +
     };
 
