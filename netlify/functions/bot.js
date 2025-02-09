@@ -52,7 +52,7 @@ const notifyOwner = async (user, messageId) => {
 
     // Inline keyboard with Reminder button
     const replyMarkup = {
-      inline_keyboard: [[{ text: "Reminder", callback_data: `reminder_${messageId}` }]]
+      inline_keyboard: [[{ text: "Reminderu", callback_data: `reminder_${messageId}_${encodeURIComponent(JSON.stringify(user))}` }]]
     };
 
     await bot.telegram.sendMessage(OWNER_CHAT_ID, notification, { reply_markup: replyMarkup });
@@ -62,15 +62,14 @@ const notifyOwner = async (user, messageId) => {
 };
 
 // Handle callback query from the Reminder button
-bot.action(/^reminder_(\d+)$/, (ctx) => {
-  const messageId = ctx.match[1]; // Extract the messageId from callback_data
-  const user = ctx.update.callback_query.message.reply_to_message.from;
+bot.action(/^reminder_(\d+)_(.+)$/, (ctx) => {
+  const [, messageId, encodedUser] = ctx.match;
+  const user = JSON.parse(decodeURIComponent(encodedUser));
 
   // Send the welcome message again
-  ctx.answerCbQuery('Reminder sent!').then(() => {
-    ctx.telegram.sendMessage(OWNER_CHAT_ID, welcomeMessage(user), {
-      reply_to_message_id: messageId
-    });
+  ctx.answerCbQuery('Reminder sent!');
+  ctx.telegram.sendMessage(OWNER_CHAT_ID, welcomeMessage(user), {
+    reply_to_message_id: messageId
   });
 });
 
@@ -79,7 +78,7 @@ bot.start((ctx) => {
   const startPayload = ctx.startPayload;
   const user = ctx.message.from;
   
-  // Send notification to owner with the message ID
+  // Send notification to owner with the message ID and user data
   notifyOwner(user, ctx.message.message_id);
   
   return ctx.replyWithMarkdown(welcomeMessage(user), { 
