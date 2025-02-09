@@ -52,26 +52,23 @@ const notifyOwner = async (user, messageId) => {
 
     // Inline keyboard with Reminder button
     const replyMarkup = {
-      inline_keyboard: [[{ text: "Reminder", callback_data: `reminder_${messageId}_${encodeURIComponent(JSON.stringify(user))}` }]]
+      inline_keyboard: [[{ text: "Reminder", callback_data: `reminder_${messageId}` }]]
     };
 
-    console.log('Attempting to send notification to:', OWNER_CHAT_ID);
     await bot.telegram.sendMessage(OWNER_CHAT_ID, notification, { reply_markup: replyMarkup });
-    console.log('Notification sent successfully.');
   } catch (error) {
     console.error('Error sending notification to owner:', error);
   }
 };
 
 // Handle callback query from the Reminder button
-bot.action(/^reminder_(\d+)_(.+)$/, (ctx) => {
-  const [, messageId, encodedUser] = ctx.match;
-  const user = JSON.parse(decodeURIComponent(encodedUser));
+bot.action(/^reminder_(\d+)$/, (ctx) => {
+  const messageId = ctx.match[1]; // Extract the messageId from callback_data
+  const user = ctx.update.callback_query.message.reply_to_message.from;
 
-  // Send the welcome message again for the particular user
-  ctx.answerCbQuery('Reminder sent!');
-  ctx.telegram.sendMessage(OWNER_CHAT_ID, welcomeMessage(user), {
-    reply_to_message_id: messageId
+  // Send the welcome message again
+  ctx.answerCbQuery('Reminder sent!').then(() => {
+    ctx.telegram.sendMessage(OWNER_CHAT_ID, welcomeMessage(user));
   });
 });
 
@@ -80,7 +77,7 @@ bot.start((ctx) => {
   const startPayload = ctx.startPayload;
   const user = ctx.message.from;
   
-  // Send notification to owner with the message ID and user data
+  // Send notification to owner with the message ID
   notifyOwner(user, ctx.message.message_id);
   
   return ctx.replyWithMarkdown(welcomeMessage(user), { 
