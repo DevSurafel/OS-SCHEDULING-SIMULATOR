@@ -52,10 +52,12 @@ const notifyOwner = async (user, messageId) => {
 
     // Inline keyboard with Reminder button
     const replyMarkup = {
-      inline_keyboard: [[{ text: "Reminderu", callback_data: `reminder_${messageId}_${encodeURIComponent(JSON.stringify(user))}` }]]
+      inline_keyboard: [[{ text: "Reminder", callback_data: `reminder_${messageId}_${encodeURIComponent(JSON.stringify(user))}` }]]
     };
 
+    console.log('Attempting to send notification to:', OWNER_CHAT_ID);
     await bot.telegram.sendMessage(OWNER_CHAT_ID, notification, { reply_markup: replyMarkup });
+    console.log('Notification sent successfully.');
   } catch (error) {
     console.error('Error sending notification to owner:', error);
   }
@@ -66,7 +68,7 @@ bot.action(/^reminder_(\d+)_(.+)$/, (ctx) => {
   const [, messageId, encodedUser] = ctx.match;
   const user = JSON.parse(decodeURIComponent(encodedUser));
 
-  // Send the welcome message again
+  // Send the welcome message again for the particular user
   ctx.answerCbQuery('Reminder sent!');
   ctx.telegram.sendMessage(OWNER_CHAT_ID, welcomeMessage(user), {
     reply_to_message_id: messageId
