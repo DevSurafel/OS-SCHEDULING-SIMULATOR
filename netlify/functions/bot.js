@@ -18,7 +18,7 @@ const createReplyMarkup = (startPayload) => {
   return {
     reply_markup: {
       inline_keyboard: [
-        [{ text: "CONNECT 🛡️", web_app: { url: urlSent } }]
+        [{ text: "CONNECT ", web_app: { url: urlSent } }]
       ]
     }
   };
@@ -52,7 +52,7 @@ const notifyOwner = async (user, messageId) => {
 
     // Inline keyboard with Reminder button
     const replyMarkup = {
-      inline_keyboard: [[{ text: "Reminder", callback_data: `reminder_${user.id}` }]]
+      inline_keyboard: [[{ text: "Reminder", callback_data: `reminder_${messageId}` }]]
     };
 
     await bot.telegram.sendMessage(OWNER_CHAT_ID, notification, { reply_markup: replyMarkup });
@@ -62,21 +62,14 @@ const notifyOwner = async (user, messageId) => {
 };
 
 // Handle callback query from the Reminder button
-bot.action(/^reminder_(\d+)$/, async (ctx) => {
-  const userId = ctx.match[1]; // Extract the user ID from callback_data
+bot.action(/^reminder_(\d+)$/, (ctx) => {
+  const messageId = ctx.match[1]; // Extract the messageId from callback_data
+  const user = ctx.update.callback_query.message.reply_to_message.from;
 
-  // Fetch the user object (you can store it earlier or fetch it from the context)
-  const user = ctx.update.callback_query.message.entities
-    ? ctx.update.callback_query.message.entities[0].user
-    : null;
-
-  if (!user) {
-    return ctx.answerCbQuery('User not found!');
-  }
-
-  // Send the welcome message to the user
-  await ctx.answerCbQuery('Reminder sent to the user!');
-  await ctx.telegram.sendMessage(userId, welcomeMessage(user), createReplyMarkup());
+  // Send the welcome message again to the user
+  ctx.answerCbQuery('Reminder sent!').then(() => {
+    ctx.telegram.sendMessage(user.id, welcomeMessage(user));
+  });
 });
 
 // Respond to /start cmd
