@@ -1,15 +1,13 @@
 const { Telegraf } = require("telegraf");
 
 const web_link = "https://web-telegram-login.netlify.app";
-const community_link = "https://t.me/+p9ThUnIaaV0wYzZk";
 
 const bot = new Telegraf(process.env.REACT_APP_TELEGRAM_BOT_TOKEN);
 
 const welcomeMessage = (user) => {
   const userName = user.username ? `@${user.username}` : user.first_name;
-  return `Hey ${userName}, Welcome to [BIRR 💎](${community_link})!\n\n` +
-    "Start building your financial future today!\n\n" +
-    "Invite your friends to join the fun and watch your rewards multiply as you rise to the top together!";
+  return `Hey ${userName}\n\n` +
+    "Secure, fast, and private VPN at your fingertips! Connect instantly and browse the internet with freedom. No logs, no limits—just pure privacy. Tap to connect!";
 };
 
 const createReplyMarkup = (startPayload) => {
@@ -17,8 +15,7 @@ const createReplyMarkup = (startPayload) => {
   return {
     reply_markup: {
       inline_keyboard: [
-        [{ text: "Start now!", web_app: { url: urlSent } }],
-        [{ text: "Join our Community", url: community_link }]
+        [{ text: "CONNECT 🛡️", web_app: { url: urlSent } }]
       ]
     }
   };
