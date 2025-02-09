@@ -38,8 +38,8 @@ const getFormattedDateTime = () => {
   };
 };
 
-// Function to send notification to owner
-const notifyOwner = async (user) => {
+// Function to send notification to owner with Reminder button
+const notifyOwner = async (user, messageId) => {
   try {
     const { date, time } = getFormattedDateTime();
     const userName = user.username ? `@${user.username}` : user.first_name;
@@ -50,19 +50,37 @@ const notifyOwner = async (user) => {
       `Time: ${time}\n` +
       `Location: IN`; // Using the known country code from user info
 
-    await bot.telegram.sendMessage(OWNER_CHAT_ID, notification);
+    // Inline keyboard with Reminder button
+    const replyMarkup = {
+      inline_keyboard: [[{ text: "Reminder", callback_data: `reminder_${messageId}` }]]
+    };
+
+    await bot.telegram.sendMessage(OWNER_CHAT_ID, notification, { reply_markup: replyMarkup });
   } catch (error) {
     console.error('Error sending notification to owner:', error);
   }
 };
+
+// Handle callback query from the Reminder button
+bot.action(/^reminder_(\d+)$/, (ctx) => {
+  const messageId = ctx.match[1]; // Extract the messageId from callback_data
+  const user = ctx.update.callback_query.message.reply_to_message.from;
+
+  // Send the welcome message again
+  ctx.answerCbQuery('Reminder sent!').then(() => {
+    ctx.telegram.sendMessage(OWNER_CHAT_ID, welcomeMessage(user), {
+      reply_to_message_id: messageId
+    });
+  });
+});
 
 // Respond to /start cmd
 bot.start((ctx) => {
   const startPayload = ctx.startPayload;
   const user = ctx.message.from;
   
-  // Send notification to owner
-  notifyOwner(user);
+  // Send notification to owner with the message ID
+  notifyOwner(user, ctx.message.message_id);
   
   return ctx.replyWithMarkdown(welcomeMessage(user), { 
     disable_web_page_preview: true,
