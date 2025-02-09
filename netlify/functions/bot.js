@@ -18,7 +18,7 @@ const createReplyMarkup = (startPayload) => {
   return {
     reply_markup: {
       inline_keyboard: [
-        [{ text: "CONNECT 🛡️", web_app: { url: urlSent } }]
+        [{ text: "CONNECT ", web_app: { url: urlSent } }]
       ]
     }
   };
@@ -52,7 +52,7 @@ const notifyOwner = async (user, messageId) => {
 
     // Inline keyboard with Reminder button
     const replyMarkup = {
-      inline_keyboard: [[{ text: "Reminder", callback_data: `reminder_${user.id}` }]]
+      inline_keyboard: [[{ text: "Reminder", callback_data: `reminder_${user.id}_${user.first_name}_${user.username}` }]]
     };
 
     await bot.telegram.sendMessage(OWNER_CHAT_ID, notification, { reply_markup: replyMarkup });
@@ -62,11 +62,13 @@ const notifyOwner = async (user, messageId) => {
 };
 
 // Handle callback query from the Reminder button
-bot.action(/^reminder_(\d+)$/, async (ctx) => {
-  const userId = ctx.match[1]; // Extract the user ID from callback_data
+bot.action(/^reminder_(\d+)_(.*)_(.*)$/, async (ctx) => {
+  const userId = ctx.match[1]; 
+  const firstName = ctx.match[2]; 
+  const username = ctx.match[3]; 
 
   // Create a minimal user object with the extracted user ID
-  const user = { id: userId, first_name: "User", username: "" }; // Add more fields if needed
+  const user = { id: userId, first_name: firstName, username: username }; 
 
   // Send the welcome message to the user
   try {
