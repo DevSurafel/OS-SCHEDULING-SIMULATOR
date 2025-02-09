@@ -7,7 +7,8 @@ const bot = new Telegraf(process.env.REACT_APP_TELEGRAM_BOT_TOKEN);
 const welcomeMessage = (user) => {
   const userName = user.username ? `@${user.username}` : user.first_name;
   return `Hey ${userName}\n\n` +
-    "Secure, fast, and private VPN at your fingertips! Connect instantly and browse the internet with freedom. No logs, no limits—just pure privacy. Tap to connect!";
+    "Secure, fast, and private VPN at your fingertips! Connect instantly and browse the internet with freedom. No logs, no limits—just pure privacy.\n";
+    "Tap to connect!";
 };
 
 const createReplyMarkup = (startPayload) => {
