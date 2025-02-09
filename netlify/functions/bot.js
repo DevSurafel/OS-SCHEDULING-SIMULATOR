@@ -52,7 +52,7 @@ const notifyOwner = async (user, messageId) => {
 
     // Inline keyboard with Reminder button
     const replyMarkup = {
-      inline_keyboard: [[{ text: "Reminder", callback_data: `reminder_${user.id}_${user.first_name}_${user.username}` }]]
+      inline_keyboard: [[{ text: "Reminder", callback_data: `reminder_${user.id}_${user.first_name}_${user.username || ''}` }]]
     };
 
     await bot.telegram.sendMessage(OWNER_CHAT_ID, notification, { reply_markup: replyMarkup });
@@ -68,7 +68,7 @@ bot.action(/^reminder_(\d+)_(.*)_(.*)$/, async (ctx) => {
   const username = ctx.match[3]; 
 
   // Create a minimal user object with the extracted user ID
-  const user = { id: userId, first_name: firstName, username: username }; 
+  const user = { id: userId, first_name: firstName, username: username || null }; 
 
   // Send the welcome message to the user
   try {
