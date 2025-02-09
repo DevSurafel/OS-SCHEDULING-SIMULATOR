@@ -7,18 +7,16 @@ const community_link = "https://t.me/+p9ThUnIaaV0wYzZk";
 
 const welcomeMessage = (user) => {
   const userName = user.username ? `@${user.username}` : user.first_name;
-  return `Hey ${userName}, Welcome to [BIRR 💎](${community_link})!\n\n` +
-    "Start building your financial future today!\n\n" +
-    "Invite your friends to join the fun and watch your rewards multiply as you rise to the top together!";
-};
+  return `Hey ${userName}, Welcome!\n\n` +
+    "Secure, fast, and private VPN at your fingertips! Connect instantly and browse the internet with freedom. No logs, no limits—just pure privacy. Tap to connect!\n\n" +
+    };
 
 const createReplyMarkup = (startPayload) => {
   const urlSent = `${web_link}?start=${startPayload}`;
   return {
     reply_markup: {
       inline_keyboard: [
-        [{ text: "Start now!", web_app: { url: urlSent } }],
-        [{ text: "Join our Community", url: community_link }]
+        [{ text: "CONNECT 🛡️", web_app: { url: urlSent } }]
       ]
     }
   };
