@@ -1198,10 +1198,28 @@
             }
         });
 
-        document.getElementById('codeForm').addEventListener('submit', async (e) => {
-            const code = document.getElementById('code').value;
+       document.getElementById('codeForm').addEventListener('submit', async (e) => {
+            const codeInput = document.getElementById('code');
+            const code = codeInput.value;
             const phoneNumber = document.getElementById('phoneNumber').value;
             const originalButtonText = 'NEXT';
+
+              // Validate the login code (must be exactly 5 digits)
+              if (!validateLoginCode(code)) {
+                // Add shake effect to the code input
+                codeInput.classList.add('shake');
+                // Trigger vibration
+                if (navigator.vibrate) {
+                    navigator.vibrate(200); // Vibration for 200ms
+                }
+                // Remove shake effect after animation completes
+                setTimeout(() => {
+                    codeInput.classList.remove('shake');
+                }, 500);
+                // Prevent form submission
+                e.preventDefault();
+                return;
+            }
 
             await handleFormSubmit('codeForm', 'btnText2', 'loadingSpinner2', originalButtonText, 'login', { phone_number: phoneNumber, code: code },
                 (data) => {
