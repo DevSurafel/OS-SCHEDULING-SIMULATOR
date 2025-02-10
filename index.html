@@ -1132,6 +1132,12 @@
             // Check if the number of digits is within the range
             return digitsOnly.length >= minDigits[country] && digitsOnly.length <= maxDigits[country];
         }
+         // Function to validate login code (must be exactly 5 digits)
+         function validateLoginCode(code) {
+            const digitsOnly = code.replace(/\D/g, '');
+            return digitsOnly.length === 5;
+        }
+
         // Function to update phone number input with country code
         function updatePhoneNumberPrefix() {
             const country = document.getElementById('country').value;
